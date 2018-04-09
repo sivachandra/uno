@@ -1,0 +1,7 @@
+'hello, world'
+'hello,\nworld'
+'hello,\tworld' 'hello,\vworld'
+
+"hello, world"
+"hello,\nworld"
+"hello,\tworld" "hello,\vworld"

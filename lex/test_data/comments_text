@@ -1,0 +1,12 @@
+# This file has simple identifier tokens and comments.
+# It is used for testing of reading comment tokens.
+
+identifier1  # A single line python comment
+identifier2  // A C++ style single line comment.
+identifier3  /* C style multiline comment
+                extending to a new line.  */
+
+/* Another C style multiline comment
+   extending to a new line.  */
+identifier3
+

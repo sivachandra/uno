@@ -1,0 +1,5 @@
+package lex
+
+const (
+	TripleQuote = "\"\"\""
+)

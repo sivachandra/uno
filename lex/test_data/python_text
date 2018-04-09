@@ -1,0 +1,16 @@
+# This file has text data in the Python language syntax.
+
+class MyClass(object):
+    def __init__(self, i: int, z: str)
+        self._i = i
+        self._z = z or '\tHello, World'
+        self._list = []  # Create an empty list.
+
+    def geti(self) -> int:
+        return self._i
+
+    def append(self, i: int):
+        return self._list.append(i)
+
+    def get(self, index: int) -> int:
+        return self._list[index]
