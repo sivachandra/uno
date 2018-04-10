@@ -7,7 +7,7 @@ import (
 	"uno/lex/token"
 )
 
-var Keywords = map[string]token.Kind{
+var KeywordMap = map[string]token.Kind{
 	"and":      token.KeywordAnd,
 	"as":       token.KeywordAs,
 	"assert":   token.KeywordAssert,
@@ -99,7 +99,7 @@ func (tz *Tokenizer) readIdentifier() (*Token, error) {
 		return nil, err
 	}
 
-	tt, e := Keywords[string(id)]
+	tt, e := KeywordMap[string(id)]
 	if e && tz.ts.Contains(tt) {
 		return newToken(tt, id, tz.r.Line(), col), nil
 	} else {

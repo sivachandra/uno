@@ -5,7 +5,7 @@ import (
 	"uno/lex/token"
 )
 
-var Operators = map[string]token.Kind{
+var OperatorMap = map[string]token.Kind{
 	"+":   token.Add,
 	"-":   token.Sub,
 	"*":   token.Mul,
@@ -61,7 +61,7 @@ var Operators = map[string]token.Kind{
 
 func (tz *Tokenizer) hasCompAssign(op []rune) bool {
 	cop := append(op, char.Equal)
-	tt, e := Operators[string(cop)]
+	tt, e := OperatorMap[string(cop)]
 	if !e {
 		return false
 	}

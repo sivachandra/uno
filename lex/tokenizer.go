@@ -41,12 +41,12 @@ func IsDelimiter(c rune) bool {
 }
 
 func IsKeyword(s string) bool {
-	_, e := Keywords[s]
+	_, e := KeywordMap[s]
 	return e
 }
 
 func IsOperator(s string) bool {
-	_, e := Operators[s]
+	_, e := OperatorMap[s]
 	return e
 }
 
