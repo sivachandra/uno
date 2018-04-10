@@ -14,7 +14,7 @@ import (
 // language syntax but only a subset as a test for
 // tokenizer.
 func TestPythonText(t *testing.T) {
-	ts := token.NewTOISet([]token.Kind{
+	ts := token.NewKindSet([]token.Kind{
 		token.PySingleLineComment,
 		token.KeywordClass,
 		token.Identifier,

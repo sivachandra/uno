@@ -6,7 +6,7 @@ import (
 )
 
 func TestNumberTokens(t *testing.T) {
-	ts := token.NewTOISet([]token.Kind{
+	ts := token.NewKindSet([]token.Kind{
 		token.DecimalInteger,
 		token.HexInteger,
 		token.OctInteger,

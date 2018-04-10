@@ -6,7 +6,7 @@ import (
 )
 
 func TestIdentifierTokens(t *testing.T) {
-	ts := token.NewTOISet([]token.Kind{
+	ts := token.NewKindSet([]token.Kind{
 		token.KeywordClass,
 		token.KeywordDef,
 		token.Identifier,

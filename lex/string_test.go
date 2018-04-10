@@ -6,7 +6,7 @@ import (
 )
 
 func TestWithSingleQuoteCharacter(t *testing.T) {
-	ts := token.NewTOISet([]token.Kind{
+	ts := token.NewKindSet([]token.Kind{
 		// We include double quote strings as they can
 		// exist along with single quote characters.
 		token.DoubleQuoteString,
@@ -29,7 +29,7 @@ func TestWithSingleQuoteCharacter(t *testing.T) {
 }
 
 func TestWithSingleQuoteString(t *testing.T) {
-	ts := token.NewTOISet([]token.Kind{
+	ts := token.NewKindSet([]token.Kind{
 		// We include double quote strings as they can
 		// exist along with single quote strings.
 		token.DoubleQuoteString,

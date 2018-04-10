@@ -10,7 +10,7 @@ func TestCommentTokens(t *testing.T) {
 	// token.Identifier so that we can test comments at the
 	// end of line in this form:
 	//   an_indentifier  # My comment end of the line comment
-	ts := token.NewTOISet([]token.Kind{
+	ts := token.NewKindSet([]token.Kind{
 		token.PySingleLineComment,
 		token.CSingleLineComment,
 		token.CMultiLineComment,

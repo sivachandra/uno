@@ -7,7 +7,7 @@ import (
 	"uno/lex/token"
 )
 
-func matchTokens(file string, ts token.TOISet, tokens []Token) error {
+func matchTokens(file string, ts token.KindSet, tokens []Token) error {
 	f, err := os.Open(file)
 	if err != nil {
 		return fmt.Errorf("Error opening simple text file. \n%s", err.Error())
