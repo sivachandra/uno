@@ -3,7 +3,7 @@ package lex
 import (
 	"fmt"
 	"uno/lex/char"
-	"uno/lex/token"
+	"uno/lex/token_kind"
 )
 
 type EscSeqReader interface {
@@ -12,7 +12,7 @@ type EscSeqReader interface {
 	// tt is the token type in which this escape sequence occurs.
 	//
 	// Returns the read character.
-	ReadChar(r *CharReader, tt token.Kind) (rune, error)
+	ReadChar(r *CharReader, tt uint32) (rune, error)
 }
 
 func isSpace(c rune) bool {
@@ -45,7 +45,7 @@ func (tz *Tokenizer) readIndentToken() (*Token, error) {
 		}
 	}
 
-	return newToken(token.Indent, v, line, col), nil
+	return newToken(token_kind.Indent, v, line, col), nil
 }
 
 func (tz *Tokenizer) skipSpace() error {
@@ -98,7 +98,7 @@ func (tz *Tokenizer) readSingleQuoteCharacter() (*Token, error) {
 		}
 
 		t := newToken(
-			token.SingleQuoteCharacter,
+			token_kind.SingleQuoteCharacter,
 			[]rune{char.SingleQuote, c, char.SingleQuote},
 			line, col)
 		return t, nil
@@ -106,7 +106,7 @@ func (tz *Tokenizer) readSingleQuoteCharacter() (*Token, error) {
 
 	// If the second char is a '\', then it is an escape sequence to be read
 	// according to the language specific rules.
-	c, err = tz.esr.ReadChar(tz.r, token.SingleQuoteCharacter)
+	c, err = tz.esr.ReadChar(tz.r, token_kind.SingleQuoteCharacter)
 	if err != nil {
 		return nil, err
 	}
@@ -122,16 +122,16 @@ func (tz *Tokenizer) readSingleQuoteCharacter() (*Token, error) {
 	}
 
 	t := newToken(
-		token.SingleQuoteCharacter,
+		token_kind.SingleQuoteCharacter,
 		[]rune{char.SingleQuote, c, char.SingleQuote},
 		line, col)
 	return t, nil
 }
 
-var quoteTokenKind = map[rune]token.Kind {
-	char.DoubleQuote: token.DoubleQuoteString,
-	char.SingleQuote: token.SingleQuoteString,
-	char.BackQuote:   token.BackQuoteString,
+var quoteTokenKind = map[rune]uint32 {
+	char.DoubleQuote: token_kind.DoubleQuoteString,
+	char.SingleQuote: token_kind.SingleQuoteString,
+	char.BackQuote:   token_kind.BackQuoteString,
 }
 
 func (tz *Tokenizer) readQuotedString(raw bool) (*Token, error) {
@@ -219,5 +219,5 @@ func (tz *Tokenizer) readPyMultilineString() (*Token, error) {
 		}
 	}
 
-	return newToken(token.PyMultilineString, s, line, col), nil
+	return newToken(token_kind.PyMultilineString, s, line, col), nil
 }

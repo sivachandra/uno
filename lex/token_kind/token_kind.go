@@ -1,9 +1,7 @@
-package token
-
-type Kind uint32
+package token_kind
 
 const (
-	Invalid = Kind(iota)
+	Invalid = uint32(iota)
 
 	// Keywords
 	KeywordAnd
@@ -147,5 +145,7 @@ const (
 	Tab
 
 	LineJoin
+
+	FirstInvalidTokenKind
 )
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 	"uno/lex/char"
-	"uno/lex/token"
+	"uno/lex/token_kind"
 )
 
 func (tz *Tokenizer) readPythonStyleComment() (*Token, error) {
@@ -30,7 +30,7 @@ func (tz *Tokenizer) readPythonStyleComment() (*Token, error) {
 		}
 	}
 
-	return newToken(token.PySingleLineComment, s, line, col), nil
+	return newToken(token_kind.PySingleLineComment, s, line, col), nil
 }
 
 func (tz *Tokenizer) readCStyleSingleLineComment() (*Token, error) {
@@ -58,7 +58,7 @@ func (tz *Tokenizer) readCStyleSingleLineComment() (*Token, error) {
 		}
 	}
 
-	return newToken(token.CSingleLineComment, s, line, col), nil
+	return newToken(token_kind.CSingleLineComment, s, line, col), nil
 }
 
 func (tz *Tokenizer) readCStyleMultiLineComment() (*Token, error) {
@@ -90,5 +90,5 @@ func (tz *Tokenizer) readCStyleMultiLineComment() (*Token, error) {
 		}
 	}
 
-	return newToken(token.CMultiLineComment, s, line, col), nil
+	return newToken(token_kind.CMultiLineComment, s, line, col), nil
 }

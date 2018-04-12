@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 	"uno/lex/char"
-	"uno/lex/token"
+	"uno/lex/token_kind"
 )
 
 var delimiterSet = map[rune]bool{
@@ -50,15 +50,34 @@ func IsOperator(s string) bool {
 	return e
 }
 
+type TokenKindSet map[uint32]bool
+
+func (s TokenKindSet) Add(t uint32) {
+	s[t] = true
+}
+
+func (s TokenKindSet) Contains(t uint32) bool {
+	_, e := s[t]
+	return e
+}
+
+func NewTokenKindSet(tokens []uint32) TokenKindSet {
+	s := TokenKindSet(make(map[uint32]bool))
+	for _, t := range tokens {
+		s.Add(t)
+	}
+	return s
+}
+
 type Tokenizer struct {
-	ts  token.KindSet
+	ts  TokenKindSet
 	r   *CharReader
 	esr EscSeqReader
 
 	// Convenience variables
-	indent  bool // true if token.Indent is present in |ts|.
-	newLine bool // true if token.NewLine is present in |ts|.
-	tab     bool // true if token.Tab is present in |ts|.
+	indent  bool // true if token_kind.Indent is present in |ts|.
+	newLine bool // true if token_kind.NewLine is present in |ts|.
+	tab     bool // true if token_kind.Tab is present in |ts|.
 }
 
 // Returns the line on which the last successfully read or attempted
@@ -76,29 +95,29 @@ func (tz *Tokenizer) Col() uint32 {
 }
 
 // Returns a new Tokenizer object.
-func NewTokenizer(r io.RuneReader, s token.KindSet, esr EscSeqReader) (*Tokenizer, error) {
+func NewTokenizer(r io.RuneReader, s TokenKindSet, esr EscSeqReader) (*Tokenizer, error) {
 	if r == nil {
 		return nil, fmt.Errorf("A non-nil rune param is required.")
 	}
 	if s == nil {
-		return nil, fmt.Errorf("A non-nil token.KindSet param is required.")
+		return nil, fmt.Errorf("A non-nil TokenKindSet param is required.")
 	}
 	// Perform a sanity check of the input set of tokens.
-	if s.Contains(token.Indent) && s.Contains(token.Tab) {
+	if s.Contains(token_kind.Indent) && s.Contains(token_kind.Tab) {
 		return nil, fmt.Errorf("Tab and indent cannot be tokens together.")
 	}
-	if s.Contains(token.PySingleLineComment) && s.Contains(token.CPPDirective) {
+	if s.Contains(token_kind.PySingleLineComment) && s.Contains(token_kind.CPPDirective) {
 		e := fmt.Errorf(
 			"Python comments and C pre-processor directives cannot be tokens together.")
 		return nil, e
 	}
-	if s.Contains(token.SingleQuoteString) && s.Contains(token.SingleQuoteCharacter) {
+	if s.Contains(token_kind.SingleQuoteString) && s.Contains(token_kind.SingleQuoteCharacter) {
 		e := fmt.Errorf(
 			"Single quoted strings and character literals cannot be tokens together.")
 		return nil, e
 	}
 
-	if esr == nil && (s.Contains(token.SingleQuoteString) || s.Contains(token.DoubleQuoteString)) {
+	if esr == nil && (s.Contains(token_kind.SingleQuoteString) || s.Contains(token_kind.DoubleQuoteString)) {
 		return nil, fmt.Errorf("A non-nil Escape Sequence Reader is required.")
 	}
 
@@ -107,15 +126,15 @@ func NewTokenizer(r io.RuneReader, s token.KindSet, esr EscSeqReader) (*Tokenize
 	tz.r = NewCharReader(r)
 	tz.esr = esr
 
-	if s.Contains(token.Indent) {
+	if s.Contains(token_kind.Indent) {
 		tz.indent = true
 	}
 
-	if s.Contains(token.Tab) {
+	if s.Contains(token_kind.Tab) {
 		tz.tab = true
 	}
 
-	if s.Contains(token.NewLine) {
+	if s.Contains(token_kind.NewLine) {
 		tz.newLine = true
 	}
 
@@ -160,7 +179,7 @@ func (tz *Tokenizer) NextToken() (*Token, error) {
 				return nil, err
 			}
 
-			t := newToken(token.Tab, []rune{c}, tz.r.Line(), tz.r.Col())
+			t := newToken(token_kind.Tab, []rune{c}, tz.r.Line(), tz.r.Col())
 			return t, nil
 		}
 
@@ -179,7 +198,7 @@ func (tz *Tokenizer) NextToken() (*Token, error) {
 
 		if tz.newLine {
 			t := newToken(
-				token.NewLine, []rune{c}, tz.r.Line(), tz.r.Col())
+				token_kind.NewLine, []rune{c}, tz.r.Line(), tz.r.Col())
 			return t, nil
 		}
 
@@ -187,7 +206,7 @@ func (tz *Tokenizer) NextToken() (*Token, error) {
 	case c == char.DoubleQuote:
 		// It can either be the beginning of a double quoted string
 		// or Python mutiline/doc string.
-		if tz.ts.Contains(token.PyMultilineString) {
+		if tz.ts.Contains(token_kind.PyMultilineString) {
 			q, err := tz.r.PeekSlice(3)
 			if err == nil {
 				if string(q) == TripleQuote {
@@ -196,27 +215,27 @@ func (tz *Tokenizer) NextToken() (*Token, error) {
 				}
 			}
 		}
-		if tz.ts.Contains(token.DoubleQuoteString) {
+		if tz.ts.Contains(token_kind.DoubleQuoteString) {
 			return tz.readQuotedString(false)
 		}
 	case c == char.SingleQuote:
 		// It can either be a single quoted string or a character
 		// literal.
-		if tz.ts.Contains(token.SingleQuoteString) {
+		if tz.ts.Contains(token_kind.SingleQuoteString) {
 			return tz.readQuotedString(false)
-		} else if tz.ts.Contains(token.SingleQuoteCharacter) {
+		} else if tz.ts.Contains(token_kind.SingleQuoteCharacter) {
 			return tz.readSingleQuoteCharacter()
 		}
 	case c == char.BackQuote:
-		if tz.ts.Contains(token.BackQuoteString) {
+		if tz.ts.Contains(token_kind.BackQuoteString) {
 			return tz.readQuotedString(true)
 		}
 	case c == char.Hash:
 		// It can either be a C pre-processor directive or a Python-style comment.
-		if tz.ts.Contains(token.PySingleLineComment) {
+		if tz.ts.Contains(token_kind.PySingleLineComment) {
 			return tz.readPythonStyleComment()
 		}
-		if !tz.ts.Contains(token.CPPDirective) {
+		if !tz.ts.Contains(token_kind.CPPDirective) {
 			break
 		}
 
@@ -242,11 +261,11 @@ func (tz *Tokenizer) NextToken() (*Token, error) {
 
 		s := []rune{hash}
 		s = append(s, id...)
-		t := newToken(token.CPPDirective, s, line, col)
+		t := newToken(token_kind.CPPDirective, s, line, col)
 		return t, nil
 	case c == char.At:
 		// Python style decorator.
-		if !tz.ts.Contains(token.PythonDecorator) {
+		if !tz.ts.Contains(token_kind.PythonDecorator) {
 			break
 		}
 
@@ -269,7 +288,7 @@ func (tz *Tokenizer) NextToken() (*Token, error) {
 
 		s := []rune{at}
 		s = append(s, id...)
-		return newToken(token.PythonDecorator, s, line, col), nil
+		return newToken(token_kind.PythonDecorator, s, line, col), nil
 	case c == char.Div:
 		// It can either be the div operator itself or can be the C-style single
 		// line comment or C-style multiline comment.
@@ -278,9 +297,9 @@ func (tz *Tokenizer) NextToken() (*Token, error) {
 			return tz.readOperator()
 		}
 
-		if cc[1] == char.Div && tz.ts.Contains(token.CSingleLineComment) {
+		if cc[1] == char.Div && tz.ts.Contains(token_kind.CSingleLineComment) {
 			return tz.readCStyleSingleLineComment()
-		} else if cc[1] == char.Mul && tz.ts.Contains(token.CMultiLineComment) {
+		} else if cc[1] == char.Mul && tz.ts.Contains(token_kind.CMultiLineComment) {
 			return tz.readCStyleMultiLineComment()
 		} else {
 			return tz.readOperator()
@@ -290,7 +309,7 @@ func (tz *Tokenizer) NextToken() (*Token, error) {
 		// a floating point number.
 		cc, err := tz.r.PeekSlice(2)
 		f := isDecimalDigit(cc[1]) || cc[1] == 'E' || cc[1] == 'e'
-		if err == nil && f && tz.ts.Contains(token.FloatNumber) {
+		if err == nil && f && tz.ts.Contains(token_kind.FloatNumber) {
 			return tz.readNumber()
 		}
 		return tz.readOperator()
@@ -309,7 +328,7 @@ func (tz *Tokenizer) NextToken() (*Token, error) {
 	return nil, unExpectedCharacterError(c)
 }
 
-func (tz *Tokenizer) newValidToken(t token.Kind, s []rune, l uint32, c uint32) (*Token, error) {
+func (tz *Tokenizer) newValidToken(t uint32, s []rune, l uint32, c uint32) (*Token, error) {
 	if !tz.ts.Contains(t) {
 		return nil, fmt.Errorf("Unexpected '%s'.", string(s))
 	}

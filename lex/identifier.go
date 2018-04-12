@@ -4,45 +4,45 @@ import (
 	"fmt"
 	"unicode"
 	"uno/lex/char"
-	"uno/lex/token"
+	"uno/lex/token_kind"
 )
 
-var KeywordMap = map[string]token.Kind{
-	"and":      token.KeywordAnd,
-	"as":       token.KeywordAs,
-	"assert":   token.KeywordAssert,
-	"break":    token.KeywordBreak,
-	"class":    token.KeywordClass,
-	"const":    token.KeywordConst,
-	"continue": token.KeywordContinue,
-	"def":      token.KeywordDef,
-	"del":      token.KeywordDel,
-	"elif":     token.KeywordElif,
-	"else":     token.KeywordElse,
-	"except":   token.KeywordExcept,
-	"false":    token.KeywordCFalse,
-	"False":    token.KeywordPyFalse,
-	"finally":  token.KeywordFinally,
-	"for":      token.KeywordFor,
-	"from":     token.KeywordFrom,
-	"global":   token.KeywordGlobal,
-	"if":       token.KeywordIf,
-	"import":   token.KeywordImport,
-	"in":       token.KeywordIn,
-	"is":       token.KeywordIs,
-	"lambda":   token.KeywordLambda,
-	"not":      token.KeywordNot,
-	"null":     token.KeywordNull,
-	"or":       token.KeywordOr,
-	"pass":     token.KeywordPass,
-	"raise":    token.KeywordRaise,
-	"return":   token.KeywordReturn,
-	"true":     token.KeywordCTrue,
-	"True":     token.KeywordPyTrue,
-	"try":      token.KeywordTry,
-	"while":    token.KeywordWhile,
-	"with":     token.KeywordWith,
-	"yield":    token.KeywordYield,
+var KeywordMap = map[string]uint32{
+	"and":      token_kind.KeywordAnd,
+	"as":       token_kind.KeywordAs,
+	"assert":   token_kind.KeywordAssert,
+	"break":    token_kind.KeywordBreak,
+	"class":    token_kind.KeywordClass,
+	"const":    token_kind.KeywordConst,
+	"continue": token_kind.KeywordContinue,
+	"def":      token_kind.KeywordDef,
+	"del":      token_kind.KeywordDel,
+	"elif":     token_kind.KeywordElif,
+	"else":     token_kind.KeywordElse,
+	"except":   token_kind.KeywordExcept,
+	"false":    token_kind.KeywordCFalse,
+	"False":    token_kind.KeywordPyFalse,
+	"finally":  token_kind.KeywordFinally,
+	"for":      token_kind.KeywordFor,
+	"from":     token_kind.KeywordFrom,
+	"global":   token_kind.KeywordGlobal,
+	"if":       token_kind.KeywordIf,
+	"import":   token_kind.KeywordImport,
+	"in":       token_kind.KeywordIn,
+	"is":       token_kind.KeywordIs,
+	"lambda":   token_kind.KeywordLambda,
+	"not":      token_kind.KeywordNot,
+	"null":     token_kind.KeywordNull,
+	"or":       token_kind.KeywordOr,
+	"pass":     token_kind.KeywordPass,
+	"raise":    token_kind.KeywordRaise,
+	"return":   token_kind.KeywordReturn,
+	"true":     token_kind.KeywordCTrue,
+	"True":     token_kind.KeywordPyTrue,
+	"try":      token_kind.KeywordTry,
+	"while":    token_kind.KeywordWhile,
+	"with":     token_kind.KeywordWith,
+	"yield":    token_kind.KeywordYield,
 }
 
 func isIdentifierBeginChar(c rune) bool {
@@ -103,6 +103,6 @@ func (tz *Tokenizer) readIdentifier() (*Token, error) {
 	if e && tz.ts.Contains(tt) {
 		return newToken(tt, id, tz.r.Line(), col), nil
 	} else {
-		return newToken(token.Identifier, id, tz.r.Line(), col), nil
+		return newToken(token_kind.Identifier, id, tz.r.Line(), col), nil
 	}
 }

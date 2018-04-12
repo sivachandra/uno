@@ -3,7 +3,7 @@ package lex
 import (
 	"fmt"
 	"uno/lex/char"
-	"uno/lex/token"
+	"uno/lex/token_kind"
 )
 
 func isDecimalDigit(c rune) bool {
@@ -72,12 +72,12 @@ func (tz *Tokenizer) readNumber() (*Token, error) {
 		c, err = tz.r.PeekChar()
 		if err != nil {
 			// Decimal zero at the end of the stream.
-			return tz.newValidToken(token.DecimalInteger, n, line, col)
+			return tz.newValidToken(token_kind.DecimalInteger, n, line, col)
 		}
 
 		if isAnyWhiteSpace(c) || (IsDelimiter(c) && c != char.Dot) {
 			// Decimal zero
-			return tz.newValidToken(token.DecimalInteger, n, line, col)
+			return tz.newValidToken(token_kind.DecimalInteger, n, line, col)
 		}
 
 		c, err := tz.r.ReadChar()
@@ -90,7 +90,7 @@ func (tz *Tokenizer) readNumber() (*Token, error) {
 
 		switch {
 		case c == 'x' || c == 'X':
-			if !tz.ts.Contains(token.HexInteger) {
+			if !tz.ts.Contains(token_kind.HexInteger) {
 				return nil, unExpectedCharacterError(c)
 			}
 			hex = true
@@ -200,21 +200,21 @@ func (tz *Tokenizer) readNumber() (*Token, error) {
 		}
 	}
 
-	var tt token.Kind
+	var tt uint32
 	if dec {
-		tt = token.DecimalInteger
+		tt = token_kind.DecimalInteger
 	}
 	if hex {
 		if len(n) < 3 {
 			return nil, hexSyntaxError()
 		}
-		tt = token.HexInteger
+		tt = token_kind.HexInteger
 	}
 	if float {
 		if len(n) < 2 {
 			return nil, floatSyntaxError()
 		}
-		tt = token.FloatNumber
+		tt = token_kind.FloatNumber
 	}
 	if oct {
 		if len(n) < 2 {
@@ -227,7 +227,7 @@ func (tz *Tokenizer) readNumber() (*Token, error) {
 		if invalidOct {
 			return nil, octSyntaxError()
 		}
-		tt = token.OctInteger
+		tt = token_kind.OctInteger
 	}
 
 	return newToken(tt, n, line, col), nil

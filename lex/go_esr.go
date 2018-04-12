@@ -2,7 +2,7 @@ package lex
 
 import (
 	"fmt"
-	"uno/lex/token"
+	"uno/lex/token_kind"
 )
 
 type GoESR struct {
@@ -19,7 +19,7 @@ var goCommonEscSeq = map[rune]rune{
 	'\\': '\\',
 }
 
-func (esr GoESR) ReadChar(r *CharReader, tt token.Kind) (rune, error) {
+func (esr GoESR) ReadChar(r *CharReader, tt uint32) (rune, error) {
 	c, err := r.ReadChar()
 	if err != nil {
 		return rune(0), err
@@ -30,11 +30,11 @@ func (esr GoESR) ReadChar(r *CharReader, tt token.Kind) (rune, error) {
 	}
 
 	switch tt {
-	case token.SingleQuoteCharacter:
+	case token_kind.SingleQuoteCharacter:
 		if c == '\'' {
 			return c, nil
 		}
-	case token.DoubleQuoteString:
+	case token_kind.DoubleQuoteString:
 		if c == '"' {
 			return c, nil
 		}

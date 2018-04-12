@@ -2,61 +2,61 @@ package lex
 
 import (
 	"uno/lex/char"
-	"uno/lex/token"
+	"uno/lex/token_kind"
 )
 
-var OperatorMap = map[string]token.Kind{
-	"+":   token.Add,
-	"-":   token.Sub,
-	"*":   token.Mul,
-	"/":   token.Div,
-	"%":   token.Mod,
-	"=":   token.Assign,
-	"+=":  token.AddAssign,
-	"-=":  token.SubAssign,
-	"*=":  token.MulAssign,
-	"/=":  token.DivAssign,
-	"%=":  token.ModAssign,
-	"<<":  token.LeftShift,
-	">>":  token.RightShift,
-	"<<=": token.LeftShiftAssign,
-	">>=": token.RightShiftAssign,
-	"==":  token.Equal,
-	"===": token.TripleEqual,
-	"!=":  token.NotEqual,
-	"&":   token.BitwiseAnd,
-	"&=":  token.BitwiseAndAssign,
-	"|":   token.BitwiseOr,
-	"|=":  token.BitwiseOrAssign,
-	"^":   token.BitwiseXor,
-	"^=":  token.BitwiseXorAssign,
-	"~":   token.BitwiseNeg,
-	"~=":  token.BitwiseNegAssign,
-	"&&":  token.LogicalAnd,
-	"||":  token.LogicalOr,
-	"!":   token.LogicalNot,
-	".":   token.Dot,
-	"..":  token.InclusiveRange,
-	"...": token.ExclusiveRange,
-	",":   token.Comma,
-	"(":   token.LeftParen,
-	")":   token.RightParen,
-	"[":   token.LeftBracket,
-	"]":   token.RightBracket,
-	"{":   token.LeftBrace,
-	"}":   token.RightBrace,
-	":":   token.Colon,
-	"::":  token.ScopeResolution,
-	";":   token.Semicolon,
-	"<":   token.LessThan,
-	"<=":  token.LessThanEqual,
-	">":   token.GreaterThan,
-	">=":  token.GreaterThanEqual,
-	"->":  token.ReturnArrow,
-	"<-":  token.ChannelIO,
-	"++":  token.UnaryIncrement,
-	"--":  token.UnaryDecrement,
-	"**":  token.MulPower,
+var OperatorMap = map[string]uint32{
+	"+":   token_kind.Add,
+	"-":   token_kind.Sub,
+	"*":   token_kind.Mul,
+	"/":   token_kind.Div,
+	"%":   token_kind.Mod,
+	"=":   token_kind.Assign,
+	"+=":  token_kind.AddAssign,
+	"-=":  token_kind.SubAssign,
+	"*=":  token_kind.MulAssign,
+	"/=":  token_kind.DivAssign,
+	"%=":  token_kind.ModAssign,
+	"<<":  token_kind.LeftShift,
+	">>":  token_kind.RightShift,
+	"<<=": token_kind.LeftShiftAssign,
+	">>=": token_kind.RightShiftAssign,
+	"==":  token_kind.Equal,
+	"===": token_kind.TripleEqual,
+	"!=":  token_kind.NotEqual,
+	"&":   token_kind.BitwiseAnd,
+	"&=":  token_kind.BitwiseAndAssign,
+	"|":   token_kind.BitwiseOr,
+	"|=":  token_kind.BitwiseOrAssign,
+	"^":   token_kind.BitwiseXor,
+	"^=":  token_kind.BitwiseXorAssign,
+	"~":   token_kind.BitwiseNeg,
+	"~=":  token_kind.BitwiseNegAssign,
+	"&&":  token_kind.LogicalAnd,
+	"||":  token_kind.LogicalOr,
+	"!":   token_kind.LogicalNot,
+	".":   token_kind.Dot,
+	"..":  token_kind.InclusiveRange,
+	"...": token_kind.ExclusiveRange,
+	",":   token_kind.Comma,
+	"(":   token_kind.LeftParen,
+	")":   token_kind.RightParen,
+	"[":   token_kind.LeftBracket,
+	"]":   token_kind.RightBracket,
+	"{":   token_kind.LeftBrace,
+	"}":   token_kind.RightBrace,
+	":":   token_kind.Colon,
+	"::":  token_kind.ScopeResolution,
+	";":   token_kind.Semicolon,
+	"<":   token_kind.LessThan,
+	"<=":  token_kind.LessThanEqual,
+	">":   token_kind.GreaterThan,
+	">=":  token_kind.GreaterThanEqual,
+	"->":  token_kind.ReturnArrow,
+	"<-":  token_kind.ChannelIO,
+	"++":  token_kind.UnaryIncrement,
+	"--":  token_kind.UnaryDecrement,
+	"**":  token_kind.MulPower,
 }
 
 func (tz *Tokenizer) hasCompAssign(op []rune) bool {
@@ -72,7 +72,7 @@ func (tz *Tokenizer) hasCompAssign(op []rune) bool {
 // Reads operators of different flavors, but all having the same starting
 // character. Consider for example '<'. The argument |tt| refers to the
 // plain '<' token, |tta| refers to '<=' token, 'ttr' refers to the '<<'
-// token, and |ttra| refers to the '<<=' token.
+// token, and |ttra| refers to the '<<=' token_kind.
 //
 // tt - The basic token type of the single character.
 // tta - The token type of the token which consists of the basic character
@@ -81,7 +81,7 @@ func (tz *Tokenizer) hasCompAssign(op []rune) bool {
 //    repeated twice.
 // ttra - The token type of the token which consists of the |ttr| token
 //    followed by the '=' character.
-func (tz *Tokenizer) readOpFlavors(tt, tta, ttr, ttra token.Kind) (*Token, error) {
+func (tz *Tokenizer) readOpFlavors(tt, tta, ttr, ttra uint32) (*Token, error) {
 	line := tz.r.NextLine()
 	col := tz.r.NextCol()
 
@@ -136,89 +136,89 @@ func (tz *Tokenizer) readOperator() (*Token, error) {
 	switch c {
 	case char.Plus:
 		return tz.readOpFlavors(
-			token.Add, token.AddAssign, token.UnaryIncrement, token.Invalid)
+			token_kind.Add, token_kind.AddAssign, token_kind.UnaryIncrement, token_kind.Invalid)
 	case char.Minus:
 		// The operator '->' is not read by readOpFlavors. Hence we handle it
 		// as a separate case.
-		if tz.ts.Contains(token.ReturnArrow) {
+		if tz.ts.Contains(token_kind.ReturnArrow) {
 			cc, err := tz.r.PeekSlice(2)
 			if err == nil && cc[1] == char.GreaterThan {
 				s, err := tz.r.ReadSlice(2)
 				if err != nil {
 					return nil, err
 				}
-				return newToken(token.ReturnArrow, s, line, col), nil
+				return newToken(token_kind.ReturnArrow, s, line, col), nil
 			}
 		}
 		return tz.readOpFlavors(
-			token.Sub, token.SubAssign, token.UnaryDecrement, token.Invalid)
+			token_kind.Sub, token_kind.SubAssign, token_kind.UnaryDecrement, token_kind.Invalid)
 	case char.Mul:
 		return tz.readOpFlavors(
-			token.Mul, token.MulAssign, token.MulPower, token.Invalid)
+			token_kind.Mul, token_kind.MulAssign, token_kind.MulPower, token_kind.Invalid)
 	case char.Div:
 		return tz.readOpFlavors(
-			token.Div, token.DivAssign, token.Invalid, token.Invalid)
+			token_kind.Div, token_kind.DivAssign, token_kind.Invalid, token_kind.Invalid)
 	case char.Mod:
 		return tz.readOpFlavors(
-			token.Mod, token.ModAssign, token.Invalid, token.Invalid)
+			token_kind.Mod, token_kind.ModAssign, token_kind.Invalid, token_kind.Invalid)
 	case char.Equal:
 		return tz.readOpFlavors(
-			token.Assign, token.Equal, token.TripleEqual, token.Invalid)
+			token_kind.Assign, token_kind.Equal, token_kind.TripleEqual, token_kind.Invalid)
 	case char.Tilde:
 		return tz.readOpFlavors(
-			token.BitwiseNeg, token.BitwiseNegAssign, token.Invalid, token.Invalid)
+			token_kind.BitwiseNeg, token_kind.BitwiseNegAssign, token_kind.Invalid, token_kind.Invalid)
 	case char.Carot:
 		return tz.readOpFlavors(
-			token.BitwiseXor, token.BitwiseXorAssign, token.Invalid, token.Invalid)
+			token_kind.BitwiseXor, token_kind.BitwiseXorAssign, token_kind.Invalid, token_kind.Invalid)
 	case char.Exclaim:
 		return tz.readOpFlavors(
-			token.LogicalNot, token.NotEqual, token.Invalid, token.Invalid)
+			token_kind.LogicalNot, token_kind.NotEqual, token_kind.Invalid, token_kind.Invalid)
 	case char.Ampersand:
 		return tz.readOpFlavors(
-			token.BitwiseAnd, token.BitwiseAndAssign, token.LogicalAnd,
-			token.Invalid)
+			token_kind.BitwiseAnd, token_kind.BitwiseAndAssign, token_kind.LogicalAnd,
+			token_kind.Invalid)
 	case char.Pipe:
 		return tz.readOpFlavors(
-			token.BitwiseOr, token.BitwiseOrAssign, token.LogicalOr,
-			token.Invalid)
+			token_kind.BitwiseOr, token_kind.BitwiseOrAssign, token_kind.LogicalOr,
+			token_kind.Invalid)
 	case char.Dot:
 		return tz.readOpFlavors(
-			token.Dot, token.Invalid, token.InclusiveRange, token.Invalid)
+			token_kind.Dot, token_kind.Invalid, token_kind.InclusiveRange, token_kind.Invalid)
 	case char.Comma:
 		return tz.readOpFlavors(
-			token.Comma, token.Invalid, token.Invalid, token.Invalid)
+			token_kind.Comma, token_kind.Invalid, token_kind.Invalid, token_kind.Invalid)
 	case char.LeftParen:
 		return tz.readOpFlavors(
-			token.LeftParen, token.Invalid, token.Invalid, token.Invalid)
+			token_kind.LeftParen, token_kind.Invalid, token_kind.Invalid, token_kind.Invalid)
 	case char.RightParen:
 		return tz.readOpFlavors(
-			token.RightParen, token.Invalid, token.Invalid, token.Invalid)
+			token_kind.RightParen, token_kind.Invalid, token_kind.Invalid, token_kind.Invalid)
 	case char.LeftBracket:
 		return tz.readOpFlavors(
-			token.LeftBracket, token.Invalid, token.Invalid, token.Invalid)
+			token_kind.LeftBracket, token_kind.Invalid, token_kind.Invalid, token_kind.Invalid)
 	case char.RightBracket:
 		return tz.readOpFlavors(
-			token.RightBracket, token.Invalid, token.Invalid, token.Invalid)
+			token_kind.RightBracket, token_kind.Invalid, token_kind.Invalid, token_kind.Invalid)
 	case char.LeftBrace:
 		return tz.readOpFlavors(
-			token.LeftBrace, token.Invalid, token.Invalid, token.Invalid)
+			token_kind.LeftBrace, token_kind.Invalid, token_kind.Invalid, token_kind.Invalid)
 	case char.RightBrace:
 		return tz.readOpFlavors(
-			token.RightBrace, token.Invalid, token.Invalid, token.Invalid)
+			token_kind.RightBrace, token_kind.Invalid, token_kind.Invalid, token_kind.Invalid)
 	case char.Colon:
 		return tz.readOpFlavors(
-			token.Colon, token.Invalid, token.ScopeResolution, token.Invalid)
+			token_kind.Colon, token_kind.Invalid, token_kind.ScopeResolution, token_kind.Invalid)
 	case char.Semicolon:
 		return tz.readOpFlavors(
-			token.Semicolon, token.Invalid, token.Invalid, token.Invalid)
+			token_kind.Semicolon, token_kind.Invalid, token_kind.Invalid, token_kind.Invalid)
 	case char.LessThan:
 		return tz.readOpFlavors(
-			token.LessThan, token.LessThanEqual, token.LeftShift,
-			token.LeftShiftAssign)
+			token_kind.LessThan, token_kind.LessThanEqual, token_kind.LeftShift,
+			token_kind.LeftShiftAssign)
 	case char.GreaterThan:
 		return tz.readOpFlavors(
-			token.GreaterThan, token.GreaterThanEqual, token.RightShift,
-			token.RightShiftAssign)
+			token_kind.GreaterThan, token_kind.GreaterThanEqual, token_kind.RightShift,
+			token_kind.RightShiftAssign)
 	}
 
 	return nil, unExpectedCharacterError(c)
